@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: inventory-of-socks
+  datasource:
+    url: jdbc:postgresql://localhost:2000/db_socks
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: db-socks-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: db_socks
+    ports:
+      - "2000:5432"
+    volumes:
+      - db_socks_data:/var/lib/postgresql/data
+
+volumes:
+  db_socks_data:
