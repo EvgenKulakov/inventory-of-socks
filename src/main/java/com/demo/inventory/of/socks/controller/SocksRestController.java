@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/socks")
 public class SocksRestController {
@@ -27,7 +29,8 @@ public class SocksRestController {
     @PostMapping("/income")
     public ResponseEntity<String> registerIncome(
             @Parameter(description = "Цвет носков") @RequestParam String color,
-            @Parameter(description = "Процентное содержание хлопка") @RequestParam int cottonPercentage,
+            @Parameter(description = "Процентное содержание хлопка")
+            @RequestParam(name = "cotton_percentage") int cottonPercentage,
             @Parameter(description = "Количество") @RequestParam int quantity
     ) {
         socksService.registerIncome(color, cottonPercentage, quantity);
@@ -42,7 +45,8 @@ public class SocksRestController {
     @PostMapping("/outcome")
     public ResponseEntity<String> registerOutcome(
             @Parameter(description = "Цвет носков") @RequestParam String color,
-            @Parameter(description = "Процентное содержание хлопка") @RequestParam int cottonPercentage,
+            @Parameter(description = "Процентное содержание хлопка")
+            @RequestParam(name = "cotton_percentage") int cottonPercentage,
             @Parameter(description = "Количество") @RequestParam int quantity
     ) {
         boolean success = socksService.registerOutcome(color, cottonPercentage, quantity);
@@ -57,7 +61,8 @@ public class SocksRestController {
     public ResponseEntity<Integer> getSocks(
             @Parameter(description = "Цвет носков") @RequestParam String color,
             @Parameter(description = "Оператор сравнения (moreThan, lessThan, equal)") @RequestParam String operator,
-            @Parameter(description = "Процентное содержание хлопка") @RequestParam int cottonPercentage
+            @Parameter(description = "Процентное содержание хлопка")
+            @RequestParam(name = "cotton_percentage") int cottonPercentage
     ) {
         int quantity = socksService.getSocks(color, operator, cottonPercentage);
         return ResponseEntity.ok(quantity);
@@ -69,7 +74,8 @@ public class SocksRestController {
     public ResponseEntity<String> updateSock(
             @Parameter(description = "id") @PathVariable int id,
             @Parameter(description = "Цвет носков") @RequestParam String color,
-            @Parameter(description = "Процентное содержание хлопка") @RequestParam int cottonPercentage,
+            @Parameter(description = "Процентное содержание хлопка")
+            @RequestParam(name = "cotton_percentage") int cottonPercentage,
             @Parameter(description = "Количество") @RequestParam int quantity
     ) {
         socksService.updateSock(id, color, cottonPercentage, quantity);
@@ -82,7 +88,7 @@ public class SocksRestController {
     public ResponseEntity<String> uploadBatch(
             @Parameter(description = "CSV файл", content = @Content(mediaType = "multipart/form-data"))
             @RequestPart("file") MultipartFile file
-    ) {
+    ) throws IOException {
         socksService.processBatchUpload(file);
         return ResponseEntity.ok("File csv uploaded successful");
     }

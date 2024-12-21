@@ -56,13 +56,8 @@ public class SocksService {
     }
 
     @Transactional
-    public void processBatchUpload(MultipartFile file) {
-        List<Socks> socksBatch;
-        try {
-            socksBatch = CsvParser.csvToSocksList(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void processBatchUpload(MultipartFile file) throws IOException {
+        List<Socks> socksBatch = CsvParser.csvToSocksList(file);
         socksDAO.batchInsertSocks(socksBatch);
         log.info("File csv uploaded successful.");
     }
