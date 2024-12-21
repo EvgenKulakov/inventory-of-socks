@@ -6,6 +6,7 @@ import com.demo.inventory.of.socks.utils.CsvParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -22,11 +23,13 @@ public class SocksService {
         this.socksDAO = socksDAO;
     }
 
+    @Transactional
     public void registerIncome(String color, int cottonPercentage, int quantity) {
         socksDAO.increaseSocksStock(color, cottonPercentage, quantity);
         log.info("Income: {} socks, color {}, cotton content {}%.", quantity, color, cottonPercentage);
     }
 
+    @Transactional
     public boolean registerOutcome(String color, int cottonPercentage, int quantity) {
         boolean enoughQuantity = socksDAO.decreaseSocksStock(color, cottonPercentage, quantity);
         if (enoughQuantity) {
@@ -37,6 +40,7 @@ public class SocksService {
         return enoughQuantity;
     }
 
+    @Transactional
     public int getSocks(String color, String operator, int cottonPercentage) {
         int totalQuantity = socksDAO.getSocksQuantity(color, operator, cottonPercentage);
         log.info("Socks total quantity: {} (if color is {} and cotton percentage {} {}%)",
@@ -44,12 +48,14 @@ public class SocksService {
         return totalQuantity;
     }
 
+    @Transactional
     public void updateSock(int id, String color, int cottonPercentage, int quantity) {
         socksDAO.updateSock(id, color, cottonPercentage, quantity);
         log.info("Update socks by id {}: color - {}, cotton percentage - {}, quantity - {}%.",
                 id, color, cottonPercentage, quantity);
     }
 
+    @Transactional
     public void processBatchUpload(MultipartFile file) {
         List<Socks> socksBatch;
         try {
@@ -58,6 +64,6 @@ public class SocksService {
             throw new RuntimeException(e);
         }
         socksDAO.batchInsertSocks(socksBatch);
-        log.info("File csv upload success");
+        log.info("File csv uploaded successful.");
     }
 }

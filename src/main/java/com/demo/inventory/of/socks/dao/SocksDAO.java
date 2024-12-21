@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -26,13 +27,17 @@ public class SocksDAO {
                 "INSERT INTO socks (color, cotton_percentage, quantity) " +
                 "VALUES (?, ?, ?) " +
                 "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
-        jdbcTemplate.update(sql, color, cottonPercentage, quantity);
+        jdbcTemplate.update(sql, color, cottonPercentage, quantity, quantity);
     }
 
     public boolean decreaseSocksStock(String color, int cottonPercentage, int quantity) {
         boolean enoughQuantity = false;
         String sqlCheck = "SELECT quantity FROM socks WHERE color = ? AND cotton_percentage = ?";
-        Integer currentQuantity = jdbcTemplate.queryForObject(sqlCheck, Integer.class, color, cottonPercentage);
+        Integer currentQuantity = jdbcTemplate.query(
+                sqlCheck,
+                (ResultSet rs) -> rs.next() ? rs.getInt("quantity") : 0,
+                color, cottonPercentage
+        );
 
         if (currentQuantity >= quantity) {
             String sqlUpdate = "UPDATE socks SET quantity = quantity - ? WHERE color = ? AND cotton_percentage = ?";
@@ -46,10 +51,10 @@ public class SocksDAO {
         String sql;
         switch (operator) {
             case "moreThan":
-                sql = "SELECT SUM(quantity) FROM socks WHERE color = ? AND cotton_percentage > ?";
+                sql = "SELECT COALESCE(SUM(quantity), 0) as quantity FROM socks WHERE color = ? AND cotton_percentage > ?";
                 break;
             case "lessThan":
-                sql = "SELECT SUM(quantity) FROM socks WHERE color = ? AND cotton_percentage < ?";
+                sql = "SELECT COALESCE(SUM(quantity), 0) as quantity FROM socks WHERE color = ? AND cotton_percentage < ?";
                 break;
             case "equal":
                 sql = "SELECT quantity FROM socks WHERE color = ? AND cotton_percentage = ?";
@@ -58,7 +63,11 @@ public class SocksDAO {
                 throw new IllegalArgumentException("Invalid operator: " + operator);
         };
 
-        return jdbcTemplate.queryForObject(sql, Integer.class, color, cottonPercentage);
+        return jdbcTemplate.query(
+                sql,
+                (ResultSet rs) -> rs.next() ? rs.getInt("quantity") : 0,
+                color, cottonPercentage
+        );
     }
 
     public void updateSock(int id, String color, int cottonPercentage, int quantity) {
@@ -83,6 +92,7 @@ public class SocksDAO {
                 ps.setString(1, socks.getColor());
                 ps.setInt(2, socks.getCottonPercentage());
                 ps.setInt(3, socks.getQuantity());
+                ps.setInt(4, socks.getQuantity());
             }
 
             @Override
