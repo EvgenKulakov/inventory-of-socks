@@ -28,6 +28,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'com.opencsv:opencsv:5.9'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'org.postgresql:postgresql'
