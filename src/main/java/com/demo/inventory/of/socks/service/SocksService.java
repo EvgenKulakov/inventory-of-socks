@@ -49,6 +49,28 @@ public class SocksService {
     }
 
     @Transactional
+    public List<Socks> getSocksByRangeWithSorting(int cottonPercentageStart, int cottonPercentageEnd,
+                                                  String sortBy, String order) {
+        List<Socks> socks;
+        if (sortBy != null) {
+            if (!sortBy.equals("color") && !sortBy.equals("cotton_percentage")) {
+                throw new IllegalArgumentException("sort_by is invalid argument: " + sortBy);
+            }
+            if (!order.equals("asc") && !order.equals("desc")) {
+                throw new IllegalArgumentException("order is invalid argument: " + order);
+            }
+            socks = socksDAO.findSocksByRangeWithSorting(cottonPercentageStart, cottonPercentageEnd, sortBy, order);
+            log.info("Find socks by range {}%-{}% with sorting by {} {}",
+                    cottonPercentageStart, cottonPercentageEnd, sortBy, order);
+        } else {
+            socks = socksDAO.findSocksByRangeWithSorting(cottonPercentageStart, cottonPercentageEnd);
+            log.info("Find socks by range {}%-{}%", cottonPercentageStart, cottonPercentageEnd);
+        }
+
+        return socks;
+    }
+
+    @Transactional
     public void updateSock(int id, String color, int cottonPercentage, int quantity) {
         socksDAO.updateSock(id, color, cottonPercentage, quantity);
         log.info("Update socks by id {}: color - {}, cotton percentage - {}, quantity - {}%.",

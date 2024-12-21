@@ -1,5 +1,6 @@
 package com.demo.inventory.of.socks.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.opencsv.bean.CsvBindByName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,7 @@ public class Socks {
     @CsvBindByName(column = "color")
     private String color;
     @CsvBindByName(column = "cotton_percentage")
+    @JsonProperty(value = "cotton_percentage")
     private int cottonPercentage;
     @CsvBindByName(column = "quantity")
     private int quantity;

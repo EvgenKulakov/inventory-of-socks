@@ -1,17 +1,21 @@
 package com.demo.inventory.of.socks.controller;
 
+import com.demo.inventory.of.socks.model.Socks;
 import com.demo.inventory.of.socks.service.SocksService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/socks")
@@ -68,6 +72,23 @@ public class SocksRestController {
         return ResponseEntity.ok(quantity);
     }
 
+    @Operation(summary = "Получение носков по диапазону содержания хлопка с сортировкой")
+    @ApiResponse(responseCode = "200", description = "List of socks matching the filter")
+    @GetMapping("/range")
+    public ResponseEntity<List<Socks>> getSocksByRangeWithSorting(
+            @Parameter(description = "Процентное содержание хлопка ОТ")
+            @RequestParam(name = "cotton_percentage_start") int cottonPercentageStart,
+            @Parameter(description = "Процентное содержание хлопка ДО")
+            @RequestParam(name = "cotton_percentage_end") int cottonPercentageEnd,
+            @Parameter(description = "Сортировать по (color, cotton_percentage)")
+            @RequestParam(name = "sort_by", required = false) String sortBy,
+            @Parameter(description = "Порядок сортировки (asc, desc)")
+            @RequestParam(required = false, defaultValue = "asc") String order
+    ) {
+        List<Socks> socks = socksService.getSocksByRangeWithSorting(cottonPercentageStart, cottonPercentageEnd, sortBy, order);
+        return ResponseEntity.ok(socks);
+    }
+
     @Operation(summary = "Обновление данных носков")
     @ApiResponse(responseCode = "200", description = "Sock updated successfully")
     @PutMapping("/{id}")
@@ -84,9 +105,13 @@ public class SocksRestController {
 
     @Operation(summary = "Загрузка партий носков из CSV файла")
     @ApiResponse(responseCode = "200", description = "File csv uploaded successful")
-    @PostMapping("/batch")
+    @PostMapping(value = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadBatch(
-            @Parameter(description = "CSV файл", content = @Content(mediaType = "multipart/form-data"))
+            @Parameter(description = "CSV файл",
+                    content = @Content(
+                            mediaType = "multipart/form-data",
+                            schema = @Schema(type = "string", format = "binary")
+                    ))
             @RequestPart("file") MultipartFile file
     ) throws IOException {
         socksService.processBatchUpload(file);

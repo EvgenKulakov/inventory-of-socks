@@ -4,6 +4,7 @@ import com.demo.inventory.of.socks.model.Socks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -25,8 +26,8 @@ public class SocksDAO {
     public void increaseSocksStock(String color, int cottonPercentage, int quantity) {
         String sql =
                 "INSERT INTO socks (color, cotton_percentage, quantity) " +
-                "VALUES (?, ?, ?) " +
-                "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
+                        "VALUES (?, ?, ?) " +
+                        "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
         jdbcTemplate.update(sql, color, cottonPercentage, quantity, quantity);
     }
 
@@ -61,13 +62,25 @@ public class SocksDAO {
                 break;
             default:
                 throw new IllegalArgumentException("Invalid operator: " + operator);
-        };
+        }
+        ;
 
         return jdbcTemplate.query(
                 sql,
                 (ResultSet rs) -> rs.next() ? rs.getInt("quantity") : 0,
                 color, cottonPercentage
         );
+    }
+
+    public List<Socks> findSocksByRangeWithSorting(int cottonPercentageStart, int cottonPercentageEnd,
+                                                   String sortBy, String order) {
+        String sql = "SELECT * FROM socks WHERE cotton_percentage BETWEEN ? AND ? ORDER BY " + sortBy + " " + order;
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Socks.class), cottonPercentageStart, cottonPercentageEnd);
+    }
+
+    public List<Socks> findSocksByRangeWithSorting(int cottonPercentageStart, int cottonPercentageEnd) {
+        String sql = "SELECT * FROM socks WHERE cotton_percentage BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Socks.class), cottonPercentageStart, cottonPercentageEnd);
     }
 
     public void updateSock(int id, String color, int cottonPercentage, int quantity) {
@@ -82,8 +95,8 @@ public class SocksDAO {
     public void batchInsertSocks(List<Socks> socksBatch) {
         String sql =
                 "INSERT INTO socks (color, cotton_percentage, quantity) " +
-                "VALUES (?, ?, ?) " +
-                "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
+                        "VALUES (?, ?, ?) " +
+                        "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override

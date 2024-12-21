@@ -5,13 +5,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import com.demo.inventory.of.socks.controller.SocksRestController;
+import com.demo.inventory.of.socks.model.Socks;
 import com.demo.inventory.of.socks.service.SocksService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.List;
 
 
 @WebMvcTest(SocksRestController.class)
@@ -116,5 +121,76 @@ class SocksRestControllerTest {
                         .file(file))
                 .andExpect(status().isOk())
                 .andExpect(content().string("File csv uploaded successful"));
+    }
+
+    @Test
+    public void testGetSocksByRangeWithSorting_Success() throws Exception {
+        List<Socks> mockSocks = List.of(
+                new Socks(1, "red", 40, 10),
+                new Socks(2, "red", 50, 5)
+        );
+
+        when(socksService.getSocksByRangeWithSorting(anyInt(), anyInt(), anyString(), anyString()))
+                .thenReturn(mockSocks);
+
+        mockMvc.perform(get("/api/socks/range")
+                        .param("cotton_percentage_start", "30")
+                        .param("cotton_percentage_end", "70")
+                        .param("sort_by", "cotton_percentage")
+                        .param("order", "desc")
+                        .contentType(MediaType.APPLICATION_JSON))
+
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].color").value("red"))
+                .andExpect(jsonPath("$[0].cotton_percentage").value(40))
+                .andExpect(jsonPath("$[0].quantity").value(10))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].color").value("red"))
+                .andExpect(jsonPath("$[1].cotton_percentage").value(50))
+                .andExpect(jsonPath("$[1].quantity").value(5));
+
+        verify(socksService, times(1))
+                .getSocksByRangeWithSorting(30, 70, "cotton_percentage", "desc");
+    }
+
+    @Test
+    public void testGetSocksByRangeWithSorting_InvalidSortBy() throws Exception {
+        mockMvc.perform(get("/range")
+                        .param("cotton_percentage_start", "30")
+                        .param("cotton_percentage_end", "70")
+                        .param("sort_by", "invalid_column")
+                        .param("order", "asc")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetSocksByRangeWithSorting_InvalidOrder() throws Exception {
+        mockMvc.perform(get("/range")
+                        .param("color", "red")
+                        .param("cotton_percentage_start", "30")
+                        .param("cotton_percentage_end", "70")
+                        .param("sort_by", "cotton_percentage")
+                        .param("order", "invalid_order")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetSocksByRangeWithSorting_NoResults() throws Exception {
+        when(socksService.getSocksByRangeWithSorting(30, 70, "cotton_percentage", "asc"))
+                .thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/range")
+                        .param("cotton_percentage_start", "30")
+                        .param("cotton_percentage_end", "70")
+                        .param("sort_by", "cotton_percentage")
+                        .param("order", "asc")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(socksService, times(0))
+                .getSocksByRangeWithSorting(30, 70, "cotton_percentage", "asc");
     }
 }
