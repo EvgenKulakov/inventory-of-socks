@@ -3,7 +3,6 @@ package com.demo.inventory.of.socks;
 import com.demo.inventory.of.socks.exception.handler.ErrorResponse;
 import com.demo.inventory.of.socks.exception.handler.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

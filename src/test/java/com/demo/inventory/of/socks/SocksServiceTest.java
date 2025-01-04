@@ -1,21 +1,12 @@
 package com.demo.inventory.of.socks;
 
 import com.demo.inventory.of.socks.dao.SocksDAO;
-import com.demo.inventory.of.socks.model.Socks;
 import com.demo.inventory.of.socks.service.SocksService;
-import com.demo.inventory.of.socks.utils.CsvParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

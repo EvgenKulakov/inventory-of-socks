@@ -26,8 +26,8 @@ public class SocksDAO {
     public void increaseSocksStock(String color, int cottonPercentage, int quantity) {
         String sql =
                 "INSERT INTO socks (color, cotton_percentage, quantity) " +
-                        "VALUES (?, ?, ?) " +
-                        "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
+                "VALUES (?, ?, ?) " +
+                "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
         jdbcTemplate.update(sql, color, cottonPercentage, quantity, quantity);
     }
 
@@ -62,8 +62,7 @@ public class SocksDAO {
                 break;
             default:
                 throw new IllegalArgumentException("Invalid operator: " + operator);
-        }
-        ;
+        };
 
         return jdbcTemplate.query(
                 sql,
@@ -95,8 +94,8 @@ public class SocksDAO {
     public void batchInsertSocks(List<Socks> socksBatch) {
         String sql =
                 "INSERT INTO socks (color, cotton_percentage, quantity) " +
-                        "VALUES (?, ?, ?) " +
-                        "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
+                "VALUES (?, ?, ?) " +
+                "ON CONFLICT (color, cotton_percentage) DO UPDATE SET quantity = socks.quantity + ?";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
